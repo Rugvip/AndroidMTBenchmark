@@ -36,7 +36,16 @@
         android:textColor="@android:color/white"
         android:drawableRight="@android:drawable/ic_menu_send" />
 
-    <ExpandableListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <Button
+        android:id="@+id/button_drop_base"
+        android:background="@drawable/play_button"
+        android:layout_width="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="5dp"
+        android:layout_height="40sp"
+        android:text="DropTheBase"
+        android:textSize="20sp"
+        android:layout_marginTop="200dp"
+        android:textColor="@android:color/white"
+        android:drawableRight="@android:drawable/ic_delete" />
 </LinearLayout>

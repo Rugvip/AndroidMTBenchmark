@@ -56,15 +56,22 @@ public class ResultFragment extends Fragment implements Employer, Observer {
             }
         });
 
+        rootView.findViewById(R.id.button_drop_base).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Persistence.resetDatabase(getActivity());
+            }
+        });
+
         return rootView;
     }
 
     private void mail() {
-        BenchmarkResult resultList = Persistence.getResult(getActivity(), workerModelSelector.getWorkerId(), 13);
+        BenchmarkResult resultList = Persistence.getResult(getActivity(), workerModelSelector.getWorkerId(), 10);
 
         Intent send = new Intent(Intent.ACTION_SENDTO);
         String uriText = "mailto:" + Uri.encode("poldsberg@gmail.com") +
-                "?subject=" + Uri.encode("Multithreading Benchmark Result - " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
+                "?subject=" + Uri.encode("Multithreading Benchmark Result | " + workerModelSelector.getWorker() + " | " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
                 "&body=" + Uri.encode("" + resultList);
         Uri uri = Uri.parse(uriText);
 

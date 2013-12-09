@@ -1,5 +1,7 @@
 package se.kth.oberg.matn.mtbench.model;
 
+import android.util.Log;
+
 import se.kth.oberg.matn.mtbench.R;
 
 public class WorkerModel1 extends WorkerModel {
@@ -8,29 +10,43 @@ public class WorkerModel1 extends WorkerModel {
         final int threadCount = workSet.getCount();
 
         final Thread threads[] = new Thread[threadCount];
+        final double results[] = new double[threadCount];
 
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
-            threads[i] = new Thread(workSet.getWorkItem());
+            threads[i] = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        results[index] = workSet.getWorkItem().call();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
         final long start = System.nanoTime();
 
         for (int i = 0; i < threadCount; i++) {
             threads[i].start();
-//            Log.i("Calculator", "started thread " + i);
         }
 
         for (int i = 0; i < threadCount; i++) {
             try {
                 threads[i].join();
-//                Log.i("Threading", "joined thread " + i);
             } catch (InterruptedException e) {
-//                Log.e("Calculator", "failed to join thread " + i);
             }
         }
 
+        double sum = 0;
+        for (int i = 0; i < threadCount; i++) {
+            sum += results[i];
+        }
+
         final long end = System.nanoTime();
+
+        Log.e("ResultSum", getName() + ": threadCount: " + workSet.getCount() + " sum: " + sum);
 
         return end - start;
     }

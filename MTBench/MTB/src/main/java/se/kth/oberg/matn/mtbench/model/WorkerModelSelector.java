@@ -6,7 +6,8 @@ public class WorkerModelSelector extends Observable {
     private final WorkerModel[] workers = new WorkerModel[] {
         new WorkerModel1(),
         new WorkerModel2(),
-        new WorkerModel3()
+        new WorkerModel3(),
+        new WorkerModel4()
     };
 
     private int workerId = 0;

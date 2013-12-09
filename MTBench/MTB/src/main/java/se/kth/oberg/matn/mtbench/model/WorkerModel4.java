@@ -3,16 +3,11 @@ package se.kth.oberg.matn.mtbench.model;
 import android.util.Log;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import se.kth.oberg.matn.mtbench.R;
 
-public class WorkerModel3 extends WorkerModel {
-    private static ThreadPool threadPool = new ThreadPool(false);
+public class WorkerModel4 extends WorkerModel {
+    private static ThreadPool threadPool = new ThreadPool(true);
 
     @Override
     public long doWork(WorkSet workSet) {
@@ -38,12 +33,12 @@ public class WorkerModel3 extends WorkerModel {
 
     @Override
     public String getName() {
-        return "Model 3";
+        return "Model 4";
     }
 
     @Override
     public int getDescriptionResource() {
-        return R.string.description_model3;
+        return R.string.description_model4;
     }
 
 }

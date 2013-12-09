@@ -1,5 +1,7 @@
 package se.kth.oberg.matn.mtbench.model;
 
+import android.util.Log;
+
 import java.util.concurrent.CyclicBarrier;
 
 import se.kth.oberg.matn.mtbench.R;
@@ -10,6 +12,7 @@ public class WorkerModel2 extends WorkerModel {
         final int threadCount = workSet.getCount();
 
         final Thread threads[] = new Thread[threadCount];
+        final double results[] = new double[threadCount];
 
         final CyclicBarrier startBarrier = new CyclicBarrier(threadCount + 1);
         final CyclicBarrier endBarrier = new CyclicBarrier(threadCount + 1);
@@ -24,7 +27,7 @@ public class WorkerModel2 extends WorkerModel {
                         startBarrier.await();
 //                        Log.i("Threading", "thread " + index + " start passed barrier");
                         synchronized (WorkerModel2.this) {}
-                        workSet.getWorkItem().run();
+                        results[index] = workSet.getWorkItem().call();
 //                        Log.i("Threading", "2 thread " + index + " end awaiting barrier");
                         endBarrier.await();
 //                        Log.i("Threading", "2 thread " + index + " end passed barrier");
@@ -62,7 +65,14 @@ public class WorkerModel2 extends WorkerModel {
             e.printStackTrace();
         }
 
+        double sum = 0;
+        for (int i = 0; i < threadCount; i++) {
+            sum += results[i];
+        }
+
         final long end = System.nanoTime();
+
+        Log.e("ResultSum", getName() + ": threadCount: " + workSet.getCount() + " sum: " + sum);
 
         for (int i = 0; i < threadCount; i++) {
             try {
