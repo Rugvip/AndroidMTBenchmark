@@ -29,13 +29,13 @@ public class Persistence {
         db.close();
     }
 
-    public static void saveResult(Context context, BenchmarkResult result) {
+    public static void saveResult(Context context, int workerId, BenchmarkResult result) {
         SQLiteDatabase db = DB.writable(context);
         ContentValues race = new ContentValues();
 
         race.put(DB.RACE_COLUMN_EXPONENT, result.getExponent());
         race.put(DB.RACE_COLUMN_LAPS, result.getResults().size());
-        race.put(DB.RACE_COLUMN_WORKER_ID, result.getWorkerId());
+        race.put(DB.RACE_COLUMN_WORKER_ID, workerId);
         long raceId = db.insert(DB.RACE_TABLE_NAME, null, race);
         Log.i("SaveResult", "race id: " + raceId);
 
@@ -66,7 +66,7 @@ public class Persistence {
             " AND " + DB.RACE_COLUMN_EXPONENT + " = ?";
 
     public static BenchmarkResult getResult(Context context, int workerId, int exponent) {
-        BenchmarkResult.Builder resultBuilder = BenchmarkResult.createBuilder(workerId, exponent);
+        BenchmarkResult.Builder resultBuilder = BenchmarkResult.createBuilder(exponent);
 
         SQLiteDatabase db = DB.readable(context);
 

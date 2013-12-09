@@ -7,57 +7,20 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
-import se.kth.oberg.matn.mtbench.model.Model1Worker;
-import se.kth.oberg.matn.mtbench.model.Model2Worker;
-import se.kth.oberg.matn.mtbench.model.Worker;
+import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 
 public class BenchmarkActivity extends ActionBarActivity implements ActionBar.OnNavigationListener {
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
     private static final int PAGE_INDEX_BENCHMARK = 0;
     private static final int PAGE_INDEX_RESULT = 1;
 
-    private static final Worker[] workers = new Worker[] {
-            new Model1Worker(),
-            new Model2Worker()
-    };
-
-    private Worker currentWorker = workers[0];
-
-    private class ViewPagerAdapter extends FragmentPagerAdapter {
-        public ViewPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            switch (i) {
-                case PAGE_INDEX_BENCHMARK: {
-                    BenchmarkFragment fragment = new BenchmarkFragment();
-                    fragment.setWorker(currentWorker);
-                    return fragment;
-                }
-                case PAGE_INDEX_RESULT: {
-                    ResultFragment fragment = new ResultFragment();
-                    fragment.setWorker(currentWorker);
-                    return fragment;
-                }
-                default:
-                    throw new IllegalStateException("Illegal fragment index requested");
-            }
-        }
-        @Override
-        public int getCount() {
-            return 2;
-        }
-    }
-
     private ViewPagerAdapter viewPagerAdapter;
     private ViewPager viewPager;
+    private final WorkerModelSelector workerSelector = new WorkerModelSelector();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +40,7 @@ public class BenchmarkActivity extends ActionBarActivity implements ActionBar.On
                         actionBar.getThemedContext(),
                         android.R.layout.simple_list_item_1,
                         android.R.id.text1,
-                        workers),
+                        workerSelector.getWorkers()),
                 this);
 
         //TODO Worker factory
@@ -113,12 +76,35 @@ public class BenchmarkActivity extends ActionBarActivity implements ActionBar.On
 
     @Override
     public boolean onNavigationItemSelected(int position, long id) {
-        currentWorker = workers[position];
-        BenchmarkFragment benchmarkFragment = (BenchmarkFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_benchmark);
-        Log.e("Select", "pos: " + position + " fragment: " + benchmarkFragment);
-        if (benchmarkFragment != null) {
-            benchmarkFragment.setWorker(currentWorker);
-        }
+        workerSelector.setWorkerId(position);
         return true;
+    }
+
+    private class ViewPagerAdapter extends FragmentPagerAdapter {
+        public ViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            switch (i) {
+                case PAGE_INDEX_BENCHMARK: {
+                    BenchmarkFragment fragment = new BenchmarkFragment();
+                    fragment.setWorkerModelSelector(workerSelector);
+                    return fragment;
+                }
+                case PAGE_INDEX_RESULT: {
+                    ResultFragment fragment = new ResultFragment();
+                    fragment.setWorkerModelSelector(workerSelector);
+                    return fragment;
+                }
+                default:
+                    throw new IllegalStateException("Illegal fragment index requested");
+            }
+        }
+        @Override
+        public int getCount() {
+            return 2;
+        }
     }
 }

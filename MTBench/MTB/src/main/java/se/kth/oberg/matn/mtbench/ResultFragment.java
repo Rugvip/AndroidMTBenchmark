@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +11,15 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import se.kth.oberg.matn.mtbench.model.BenchmarkResult;
-import se.kth.oberg.matn.mtbench.model.Worker;
+import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 import se.kth.oberg.matn.mtbench.persistence.Persistence;
 
-public class ResultFragment extends Fragment implements Employer {
+public class ResultFragment extends Fragment implements Employer, Observer {
     private static final String PREFERENCE_EXPONENT = "exponent";
     private static final String PREFERENCE_COUNT = "count";
     private static final int DEFAULT_EXPONENT = 16;
@@ -28,19 +27,15 @@ public class ResultFragment extends Fragment implements Employer {
 
     private TextView descriptionText;
 
-    private Worker worker;
-    private List<BenchmarkResult> results = null;
+    private WorkerModelSelector workerModelSelector;
 
     public ResultFragment() {
     }
 
-    @Override
-    public void setWorker(Worker worker) {
-        this.worker = worker;
-        Log.e("setWorker", "worker: " + worker + " text: " + descriptionText);
-        if (descriptionText != null) {
-            descriptionText.setText(worker.getDescriptionResource());
-        }
+    public void setWorkerModelSelector(WorkerModelSelector workerModelSelector) {
+        this.workerModelSelector = workerModelSelector;
+        workerModelSelector.addObserver(this);
+        update(workerModelSelector, null);
     }
 
     @Override
@@ -50,8 +45,8 @@ public class ResultFragment extends Fragment implements Employer {
 
         descriptionText = (TextView) rootView.findViewById(R.id.sec);
 
-        if (worker != null) {
-            descriptionText.setText(worker.getDescriptionResource());
+        if (workerModelSelector != null) {
+            descriptionText.setText(workerModelSelector.getWorker().getDescriptionResource());
         }
 
         rootView.findViewById(R.id.button_email).setOnClickListener(new View.OnClickListener() {
@@ -65,7 +60,7 @@ public class ResultFragment extends Fragment implements Employer {
     }
 
     private void mail() {
-        BenchmarkResult resultList = Persistence.getResult(getActivity(), worker.getId(), 14);
+        BenchmarkResult resultList = Persistence.getResult(getActivity(), workerModelSelector.getWorkerId(), 13);
 
         Intent send = new Intent(Intent.ACTION_SENDTO);
         String uriText = "mailto:" + Uri.encode("poldsberg@gmail.com") +
@@ -79,4 +74,13 @@ public class ResultFragment extends Fragment implements Employer {
 
     // / 1000000000.0
     private static final DecimalFormat format = new DecimalFormat("#.###");
+
+    @Override
+    public void update(Observable observable, Object o) {
+        WorkerModelSelector workerModelSelector = (WorkerModelSelector) observable;
+
+        if (descriptionText != null) {
+            descriptionText.setText(workerModelSelector.getWorker().getDescriptionResource());
+        }
+    }
 }

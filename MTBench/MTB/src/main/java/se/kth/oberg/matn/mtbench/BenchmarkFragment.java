@@ -14,14 +14,17 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
+import java.util.Observable;
+import java.util.Observer;
 
 import se.kth.oberg.matn.mtbench.model.Benchmark;
 import se.kth.oberg.matn.mtbench.model.BenchmarkResult;
+import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 import se.kth.oberg.matn.mtbench.model.WorkCollection;
 import se.kth.oberg.matn.mtbench.model.Worker;
 import se.kth.oberg.matn.mtbench.persistence.Persistence;
 
-public class BenchmarkFragment extends Fragment implements Employer {
+public class BenchmarkFragment extends Fragment implements Employer, Observer {
     private static final String PREFERENCE_EXPONENT = "exponent";
     private static final String PREFERENCE_COUNT = "count";
     private static final int DEFAULT_EXPONENT = 16;
@@ -36,7 +39,7 @@ public class BenchmarkFragment extends Fragment implements Employer {
     private ProgressBar workProgress;
     private ProgressBar countProgress;
 
-    private Worker worker;
+    private WorkerModelSelector workerModelSelector;
     private BenchmarkResult.Builder resultBuilder = null;
     private WorkCollection workCollection;
     private int testCount;
@@ -44,13 +47,10 @@ public class BenchmarkFragment extends Fragment implements Employer {
     public BenchmarkFragment() {
     }
 
-    @Override
-    public void setWorker(Worker worker) {
-        this.worker = worker;
-        Log.e("setWorker", "worker: " + worker + " text: " + descriptionText);
-        if (descriptionText != null) {
-            descriptionText.setText(worker.getDescriptionResource());
-        }
+    public void setWorkerModelSelector(WorkerModelSelector workerModelSelector) {
+        this.workerModelSelector = workerModelSelector;
+        workerModelSelector.addObserver(this);
+        update(workerModelSelector, null);
     }
 
     @Override
@@ -71,8 +71,8 @@ public class BenchmarkFragment extends Fragment implements Employer {
         workProgress = (ProgressBar) rootView.findViewById(R.id.progress_bar_work);
         countProgress = (ProgressBar) rootView.findViewById(R.id.progress_bar_count);
 
-        if (worker != null) {
-            descriptionText.setText(worker.getDescriptionResource());
+        if (workerModelSelector != null) {
+            descriptionText.setText(workerModelSelector.getWorker().getDescriptionResource());
         }
 
         exponentText.setText("" + exponent);
@@ -114,6 +114,7 @@ public class BenchmarkFragment extends Fragment implements Employer {
     }
 
     public void runBenchmark() {
+        workerModelSelector.freeze();
         workCollection = WorkCollection.buildDefaultCollection(exponentSeek.getProgress());
         testCount = countSeek.getProgress() + 1;
         countProgress.setMax(testCount);
@@ -124,15 +125,16 @@ public class BenchmarkFragment extends Fragment implements Employer {
     }
 
     public void runSingleBenchmark() {
-        new BenchmarkTask(worker).execute(workCollection);
+        new BenchmarkTask(workerModelSelector.getWorker()).execute(workCollection);
     }
 
     public void afterBenchmarkComplete() {
         exponentSeek.setEnabled(true);
         countSeek.setEnabled(true);
 
-        Persistence.saveResult(getActivity(), resultBuilder.build());
+        Persistence.saveResult(getActivity(), workerModelSelector.getWorkerId(), resultBuilder.build());
         resultBuilder = null;
+        workerModelSelector.thaw();
     }
 
     private class BenchmarkTask extends Benchmark {
@@ -154,7 +156,7 @@ public class BenchmarkFragment extends Fragment implements Employer {
                     " 4th: " + benchmarkResult.getResults().get(3).getTimes()[0]);
 
             if (resultBuilder == null) { // skip first result
-                resultBuilder = BenchmarkResult.createBuilder(worker, workCollection);
+                resultBuilder = BenchmarkResult.createBuilder(workCollection.getExponent());
             } else {
                 resultBuilder.addResult(benchmarkResult);
             }
@@ -172,4 +174,13 @@ public class BenchmarkFragment extends Fragment implements Employer {
 
     // / 1000000000.0
     private static final DecimalFormat format = new DecimalFormat("#.###");
+
+    @Override
+    public void update(Observable observable, Object o) {
+        WorkerModelSelector workerModelSelector = (WorkerModelSelector) observable;
+
+        if (descriptionText != null) {
+            descriptionText.setText(workerModelSelector.getWorker().getDescriptionResource());
+        }
+    }
 }

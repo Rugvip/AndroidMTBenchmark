@@ -1,7 +1,7 @@
 package se.kth.oberg.matn.mtbench;
 
-import se.kth.oberg.matn.mtbench.model.Worker;
+import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 
 public interface Employer {
-    public void setWorker(Worker worker);
+    public void setWorkerModelSelector(WorkerModelSelector workerModelSelector);
 }

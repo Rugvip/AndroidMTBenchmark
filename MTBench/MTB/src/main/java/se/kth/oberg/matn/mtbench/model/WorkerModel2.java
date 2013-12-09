@@ -4,7 +4,7 @@ import java.util.concurrent.CyclicBarrier;
 
 import se.kth.oberg.matn.mtbench.R;
 
-public class Model2Worker extends Worker {
+public class WorkerModel2 extends WorkerModel {
     @Override
     public long doWork(final WorkSet workSet) {
         final int threadCount = workSet.getCount();
@@ -23,7 +23,7 @@ public class Model2Worker extends Worker {
 //                        Log.i("Threading", "thread " + index + " start awaiting barrier");
                         startBarrier.await();
 //                        Log.i("Threading", "thread " + index + " start passed barrier");
-                        synchronized (Model2Worker.this) {}
+                        synchronized (WorkerModel2.this) {}
                         workSet.getWorkItem().run();
 //                        Log.i("Threading", "2 thread " + index + " end awaiting barrier");
                         endBarrier.await();
@@ -84,10 +84,5 @@ public class Model2Worker extends Worker {
     @Override
     public String getName() {
         return "Model 2";
-    }
-
-    @Override
-    public int getId() {
-        return 1;
     }
 }

@@ -17,7 +17,7 @@ public class Benchmark extends AsyncTask<WorkCollection, Integer, BenchmarkResul
 
         WorkCollection workCollection = workCollections[0];
 
-        BenchmarkResult.Builder result = BenchmarkResult.createBuilder(worker, workCollection);
+        BenchmarkResult.Builder result = BenchmarkResult.createBuilder(workCollection.getExponent());
 
         int size = workCollection.size();
 

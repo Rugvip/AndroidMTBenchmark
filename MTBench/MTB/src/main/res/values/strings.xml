@@ -5,5 +5,6 @@
     <string name="action_settings">Settings</string>
     <string name="description_model1">One thread is created for each work item. The time measured is from before thread start until after all threads have been joined.</string>
     <string name="description_model2">One thread is created for each work item. The time measured is the time it takes to complete the work in all threads, excluding thread start and join delay.</string>
+    <string name="description_model3">Each unit of work is executed on a thread pool.</string>
 
 </resources>

@@ -7,15 +7,10 @@ import java.util.List;
 
 public class BenchmarkResult {
     private int exponent;
-    private int workerId;
     private List<Result> results = new LinkedList<>();
 
     public int getExponent() {
         return exponent;
-    }
-
-    public int getWorkerId() {
-        return workerId;
     }
 
     public List<Result> getResults() {
@@ -42,7 +37,6 @@ public class BenchmarkResult {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{\n");
-        stringBuilder.append("    worker: " + workerId + "\n");
         stringBuilder.append("    exponent: " + exponent + "\n");
         stringBuilder.append("    results: [");
 
@@ -101,27 +95,18 @@ public class BenchmarkResult {
         }
     }
 
-    public static Builder createBuilder(Worker worker, WorkCollection workCollection) {
-        return new Builder(worker, workCollection);
-    }
-
-    public static Builder createBuilder(int workerId, int exponent) {
-        return new Builder(workerId, exponent);
+    public static Builder createBuilder(int exponent) {
+        return new Builder(exponent);
     }
 
     public static class Builder {
         private BenchmarkResult result;
         private HashMap<Integer, Result> resultMap;
 
-        public Builder(int workerId, int exponent) {
+        public Builder(int exponent) {
             result = new BenchmarkResult();
             resultMap = new HashMap<>();
-            result.workerId = workerId;
             result.exponent = exponent;
-        }
-
-        private Builder(Worker worker, WorkCollection workCollection) {
-            this(worker.getId(), workCollection.getExponent());
         }
 
         public Builder addResult(long time, WorkSet workSet) {
@@ -143,6 +128,9 @@ public class BenchmarkResult {
         }
 
         public Builder addResult(BenchmarkResult benchmarkResult) {
+            if (benchmarkResult.exponent != result.exponent) {
+                throw new IllegalArgumentException("Trying to merge results with different exponent");
+            }
             for (Result r : benchmarkResult.results) {
                 for (Long time : r.times) {
                     addResult(time, r.workerCount, r.workItems);

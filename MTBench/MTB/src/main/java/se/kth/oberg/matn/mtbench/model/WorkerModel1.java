@@ -2,7 +2,7 @@ package se.kth.oberg.matn.mtbench.model;
 
 import se.kth.oberg.matn.mtbench.R;
 
-public class Model1Worker extends Worker {
+public class WorkerModel1 extends WorkerModel {
     @Override
     public long doWork(final WorkSet workSet) {
         final int threadCount = workSet.getCount();
@@ -43,10 +43,5 @@ public class Model1Worker extends Worker {
     @Override
     public String getName() {
         return "Model 1";
-    }
-
-    @Override
-    public int getId() {
-        return 0;
     }
 }
