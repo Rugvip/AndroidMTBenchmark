@@ -33,8 +33,7 @@ public class BenchmarkResult {
 }
 */
 
-    @Override
-    public String toString() {
+    public String toJson() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{\n");
         stringBuilder.append("    exponent: " + exponent + "\n");
@@ -54,7 +53,6 @@ public class BenchmarkResult {
                 }
             }
             stringBuilder.append("]\n");
-//            + result.getTime() + "\n");
             stringBuilder.append("    }");
             if (i < results.size() - 1) {
                 stringBuilder.append(", ");
@@ -62,6 +60,31 @@ public class BenchmarkResult {
         }
 
         stringBuilder.append("]\n");
+        stringBuilder.append("}\n");
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{");
+        for (int i = 0; i < results.size(); i++) {
+            Result result = results.get(i);
+            stringBuilder.append("{");
+            Long[] times = result.getTimes();
+            for (int j = 0; j < times.length; j++) {
+                stringBuilder.append(times[j]);
+                if (j < times.length - 1) {
+                    stringBuilder.append(",");
+                }
+            }
+            stringBuilder.append("}");
+            if (i < results.size() - 1) {
+                stringBuilder.append(",\n");
+            }
+        }
+
         stringBuilder.append("}\n");
 
         return stringBuilder.toString();

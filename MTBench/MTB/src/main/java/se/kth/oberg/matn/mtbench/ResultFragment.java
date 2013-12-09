@@ -67,12 +67,15 @@ public class ResultFragment extends Fragment implements Employer, Observer {
     }
 
     private void mail() {
-        BenchmarkResult resultList = Persistence.getResult(getActivity(), workerModelSelector.getWorkerId(), 10);
+        BenchmarkResult result = Persistence.getResult(getActivity(), workerModelSelector.getWorkerId(), 10);
 
         Intent send = new Intent(Intent.ACTION_SENDTO);
         String uriText = "mailto:" + Uri.encode("poldsberg@gmail.com") +
-                "?subject=" + Uri.encode("Multithreading Benchmark Result | " + workerModelSelector.getWorker() + " | " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
-                "&body=" + Uri.encode("" + resultList);
+                "?subject=" + Uri.encode("Multithreading Benchmark Result | " +
+                workerModelSelector.getWorker() + " | " +
+                result.getExponent() + " | " +
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
+                "&body=" + Uri.encode("" + result);
         Uri uri = Uri.parse(uriText);
 
         send.setData(uri);

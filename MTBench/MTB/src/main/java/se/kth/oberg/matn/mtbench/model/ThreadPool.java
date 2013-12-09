@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +20,10 @@ class ThreadPool {
     private int count;
 
     public ThreadPool(boolean limited) {
-        executor = new ThreadPoolExecutor(NUMBER_OF_CORES, limited ? NUMBER_OF_CORES : Integer.MAX_VALUE, 1, TimeUnit.MINUTES, new LinkedBlockingDeque<Runnable>());
+        executor = new ThreadPoolExecutor(NUMBER_OF_CORES,
+                limited ? NUMBER_OF_CORES : Integer.MAX_VALUE,
+                1, TimeUnit.MINUTES,
+                limited ? new LinkedBlockingDeque<Runnable>() : new SynchronousQueue<Runnable>());
         completionService = new ExecutorCompletionService<>(executor);
         count = 0;
     }
