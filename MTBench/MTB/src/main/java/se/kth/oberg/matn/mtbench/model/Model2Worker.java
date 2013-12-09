@@ -88,6 +88,6 @@ public class Model2Worker extends Worker {
 
     @Override
     public int getId() {
-        return 2;
+        return 1;
     }
 }

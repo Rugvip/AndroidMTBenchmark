@@ -47,6 +47,6 @@ public class Model1Worker extends Worker {
 
     @Override
     public int getId() {
-        return 1;
+        return 0;
     }
 }

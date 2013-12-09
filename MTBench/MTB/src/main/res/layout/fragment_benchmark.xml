@@ -8,10 +8,11 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="se.kth.oberg.matn.mtbench.WorkerFragment">
+    android:id="@+id/fragment_benchmark"
+    tools:context="se.kth.oberg.matn.mtbench.BenchmarkFragment">
 
     <TextView
-        android:id="@+id/section_label"
+        android:id="@+id/text_view_model_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dip"

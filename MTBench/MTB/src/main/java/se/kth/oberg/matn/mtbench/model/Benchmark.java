@@ -25,7 +25,7 @@ public class Benchmark extends AsyncTask<WorkCollection, Integer, BenchmarkResul
         int count = 0;
 
         for (WorkSet workSet : workCollection) {
-            result.addWorkResult(worker.doWork(workSet), workSet);
+            result.addResult(worker.doWork(workSet), workSet);
             publishProgress((++count * 100) / size);
         }
 

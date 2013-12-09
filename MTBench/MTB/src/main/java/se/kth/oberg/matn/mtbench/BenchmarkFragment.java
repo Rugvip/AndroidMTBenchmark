@@ -1,8 +1,6 @@
 package se.kth.oberg.matn.mtbench;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -16,10 +14,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import se.kth.oberg.matn.mtbench.model.Benchmark;
 import se.kth.oberg.matn.mtbench.model.BenchmarkResult;
@@ -27,13 +21,13 @@ import se.kth.oberg.matn.mtbench.model.WorkCollection;
 import se.kth.oberg.matn.mtbench.model.Worker;
 import se.kth.oberg.matn.mtbench.persistence.Persistence;
 
-public class WorkerFragment extends Fragment {
+public class BenchmarkFragment extends Fragment implements Employer {
     private static final String PREFERENCE_EXPONENT = "exponent";
     private static final String PREFERENCE_COUNT = "count";
     private static final int DEFAULT_EXPONENT = 16;
     private static final int DEFAULT_COUNT = 1;
-    private static final String ARG_WORKER = "worker";
 
+    private TextView descriptionText;
     private TextView exponentText;
     private SeekBar exponentSeek;
     private TextView countText;
@@ -43,19 +37,20 @@ public class WorkerFragment extends Fragment {
     private ProgressBar countProgress;
 
     private Worker worker;
-    private List<BenchmarkResult> results = null;
+    private BenchmarkResult.Builder resultBuilder = null;
     private WorkCollection workCollection;
     private int testCount;
 
-    public static WorkerFragment newInstance(Worker worker) {
-        WorkerFragment fragment = new WorkerFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_WORKER, worker);
-        fragment.setArguments(args);
-        return fragment;
+    public BenchmarkFragment() {
     }
 
-    public WorkerFragment() {
+    @Override
+    public void setWorker(Worker worker) {
+        this.worker = worker;
+        Log.e("setWorker", "worker: " + worker + " text: " + descriptionText);
+        if (descriptionText != null) {
+            descriptionText.setText(worker.getDescriptionResource());
+        }
     }
 
     @Override
@@ -63,16 +58,11 @@ public class WorkerFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_benchmark, container, false);
         assert rootView != null;
 
-        worker = (Worker) getArguments().getSerializable(ARG_WORKER);
-        assert worker != null;
-
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int exponent = sharedPreferences.getInt(PREFERENCE_EXPONENT, DEFAULT_EXPONENT);
         int count = sharedPreferences.getInt(PREFERENCE_COUNT, DEFAULT_COUNT);
 
-        TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-        textView.setText(worker.getDescriptionResource());
-
+        descriptionText = (TextView) rootView.findViewById(R.id.text_view_model_description);
         exponentText = (TextView) rootView.findViewById(R.id.text_view_exponent);
         exponentSeek = (SeekBar) rootView.findViewById(R.id.seek_bar_exponent);
         countText = (TextView) rootView.findViewById(R.id.text_view_count);
@@ -80,6 +70,10 @@ public class WorkerFragment extends Fragment {
         runButton = (Button) rootView.findViewById(R.id.button_run);
         workProgress = (ProgressBar) rootView.findViewById(R.id.progress_bar_work);
         countProgress = (ProgressBar) rootView.findViewById(R.id.progress_bar_count);
+
+        if (worker != null) {
+            descriptionText.setText(worker.getDescriptionResource());
+        }
 
         exponentText.setText("" + exponent);
         exponentSeek.setProgress(exponent);
@@ -137,10 +131,8 @@ public class WorkerFragment extends Fragment {
         exponentSeek.setEnabled(true);
         countSeek.setEnabled(true);
 
-        for (BenchmarkResult result : results) {
-            Persistence.saveResult(getActivity(), result);
-        }
-        results = null;
+        Persistence.saveResult(getActivity(), resultBuilder.build());
+        resultBuilder = null;
     }
 
     private class BenchmarkTask extends Benchmark {
@@ -156,15 +148,15 @@ public class WorkerFragment extends Fragment {
         @Override
         protected void onPostExecute(BenchmarkResult benchmarkResult) {
             Log.e("Result", "size: " + benchmarkResult.getResults().size() +
-                    " 1st: " + benchmarkResult.getResults().get(0).getTime() +
-                    " 2nd: " + benchmarkResult.getResults().get(1).getTime() +
-                    " 3rd: " + benchmarkResult.getResults().get(2).getTime() +
-                    " 4th: " + benchmarkResult.getResults().get(3).getTime());
+                    " 1st: " + benchmarkResult.getResults().get(0).getTimes()[0] +
+                    " 2nd: " + benchmarkResult.getResults().get(1).getTimes()[0] +
+                    " 3rd: " + benchmarkResult.getResults().get(2).getTimes()[0] +
+                    " 4th: " + benchmarkResult.getResults().get(3).getTimes()[0]);
 
-            if (results == null) { // skip first result
-                results = new LinkedList<>();
+            if (resultBuilder == null) { // skip first result
+                resultBuilder = BenchmarkResult.createBuilder(worker, workCollection);
             } else {
-                results.add(benchmarkResult);
+                resultBuilder.addResult(benchmarkResult);
             }
 
             workProgress.setProgress(0);
@@ -176,17 +168,6 @@ public class WorkerFragment extends Fragment {
                 afterBenchmarkComplete();
             }
         }
-    }
-
-    private void mail() {
-        Intent send = new Intent(Intent.ACTION_SENDTO);
-        String uriText = "mailto:" + Uri.encode("poldsberg@gmail.com,axel.odelberg@gmail.com") +
-                "?subject=" + Uri.encode("Multithreading Benchmark Result - " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
-                "&body=" + Uri.encode("ze body");
-        Uri uri = Uri.parse(uriText);
-
-        send.setData(uri);
-        startActivity(Intent.createChooser(send, "Send mail..."));
     }
 
     // / 1000000000.0
