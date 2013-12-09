@@ -58,6 +58,6 @@ public class WorkerModel1 extends WorkerModel {
 
     @Override
     public String getName() {
-        return "Model 1";
+        return "Plain Threads";
     }
 }

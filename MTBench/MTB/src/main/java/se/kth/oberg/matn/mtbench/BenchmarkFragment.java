@@ -121,6 +121,7 @@ public class BenchmarkFragment extends Fragment implements Employer, Observer {
         countProgress.setProgress(0);
         exponentSeek.setEnabled(false);
         countSeek.setEnabled(false);
+        runButton.setEnabled(false);
         runSingleBenchmark();
     }
 
@@ -131,6 +132,7 @@ public class BenchmarkFragment extends Fragment implements Employer, Observer {
     public void afterBenchmarkComplete() {
         exponentSeek.setEnabled(true);
         countSeek.setEnabled(true);
+        runButton.setEnabled(true);
 
         Persistence.saveResult(getActivity(), workerModelSelector.getWorkerId(), resultBuilder.build());
         resultBuilder = null;

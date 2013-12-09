@@ -33,7 +33,7 @@ public class WorkerModel4 extends WorkerModel {
 
     @Override
     public String getName() {
-        return "Model 4";
+        return "Thread Pool, limit = # cores";
     }
 
     @Override

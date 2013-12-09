@@ -20,8 +20,13 @@ class ThreadPool {
     private int count;
 
     public ThreadPool(boolean limited) {
-        executor = new ThreadPoolExecutor(NUMBER_OF_CORES,
-                limited ? NUMBER_OF_CORES : Integer.MAX_VALUE,
+        this(limited, limited ? NUMBER_OF_CORES : -1);
+    }
+
+    public ThreadPool(boolean limited, int limit) {
+        executor = new ThreadPoolExecutor(
+                limit < 0 ? NUMBER_OF_CORES : limit,
+                limit < 0 ? Integer.MAX_VALUE : limit,
                 1, TimeUnit.MINUTES,
                 limited ? new LinkedBlockingDeque<Runnable>() : new SynchronousQueue<Runnable>());
         completionService = new ExecutorCompletionService<>(executor);
