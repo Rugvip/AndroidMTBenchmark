@@ -13,39 +13,22 @@
     android:id="@+id/fragment_result"
     tools:context="se.kth.oberg.matn.mtbench.ResultFragment">
 
-    <TextView
-        android:id="@+id/sec"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dip"
-        android:onClick=""
-        android:textSize="16sp"
-        android:text="@string/description_model1"
-        android:textAlignment="center" />
-
-    <Button
-        android:id="@+id/button_email"
-        android:background="@drawable/play_button"
-        android:layout_width="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="5dp"
-        android:layout_height="40sp"
-        android:text="Email result"
-        android:textSize="20sp"
-        android:layout_marginTop="5dp"
-        android:textColor="@android:color/white"
-        android:drawableRight="@android:drawable/ic_menu_send" />
-
     <Button
         android:id="@+id/button_drop_base"
         android:background="@drawable/play_button"
         android:layout_width="wrap_content"
         android:paddingLeft="10dp"
         android:paddingRight="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="20dp"
         android:layout_height="40sp"
         android:text="DropTheBase"
         android:textSize="20sp"
-        android:layout_marginTop="200dp"
         android:textColor="@android:color/white"
         android:drawableRight="@android:drawable/ic_delete" />
+
+    <ExpandableListView
+        android:id="@+id/expandable_list_view_result_summary"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

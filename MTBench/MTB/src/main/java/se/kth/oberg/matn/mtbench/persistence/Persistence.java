@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.util.Log;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,39 +15,46 @@ public class Persistence {
     public static void resetDatabase(Context context) {
         SQLiteDatabase db = DB.writable(context);
         db.execSQL("DROP TABLE IF EXISTS " + DB.LAP_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DB.CAR_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + DB.RACE_TABLE_NAME);
         db.execSQL(DB.CREATE_RACE_TABLE);
+        db.execSQL(DB.CREATE_CAR_TABLE);
         db.execSQL(DB.CREATE_LAP_TABLE);
         db.close();
     }
 
     public static void deleteResult(Context context, int id) {
         SQLiteDatabase db = DB.writable(context);
-        db.delete(DB.LAP_TABLE_NAME, DB.LAP_COLUMN_RACE_ID + " = ?", new String[]{"" + id});
-        db.delete(DB.RACE_TABLE_NAME, DB.RACE_COLUMN_ID + " = ?", new String[]{"" + id});
+        String[] args = new String[] {"" + id};
+        db.execSQL(" DELETE " + DB.CAR_TABLE_NAME + ", " + DB.LAP_TABLE_NAME +
+                " FROM " + DB.LAP_TABLE_NAME +
+                " INNER JOIN " + DB.CAR_TABLE_NAME +
+                " ON " + DB.CAR_COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
+                " WHERE " + DB.CAR_COLUMN_RACE_ID + " = ?", args);
+        db.delete(DB.CAR_TABLE_NAME, DB.CAR_COLUMN_RACE_ID + " = ?", args);
+        db.delete(DB.RACE_TABLE_NAME, DB.RACE_COLUMN_ID + " = ?", args);
         db.close();
     }
 
     public static void saveResult(Context context, int workerId, BenchmarkResult result) {
         SQLiteDatabase db = DB.writable(context);
-        ContentValues race = new ContentValues();
 
+        ContentValues race = new ContentValues();
         race.put(DB.RACE_COLUMN_EXPONENT, result.getExponent());
-        race.put(DB.RACE_COLUMN_LAPS, result.getResults().size());
         race.put(DB.RACE_COLUMN_WORKER_ID, workerId);
         long raceId = db.insert(DB.RACE_TABLE_NAME, null, race);
-        Log.i("SaveResult", "race id: " + raceId);
 
-        int i = 0;
         for (BenchmarkResult.Result singleResult : result.getResults()) {
-            i++;
+            ContentValues car = new ContentValues();
+            car.put(DB.CAR_COLUMN_WORKERS, singleResult.getWorkerCount());
+            car.put(DB.CAR_COLUMN_ITEMS, singleResult.getWorkItems());
+            car.put(DB.CAR_COLUMN_RACE_ID, raceId);
+            long carId = db.insert(DB.CAR_TABLE_NAME, null, car);
+
             for (Long time : singleResult.getTimes()) {
                 ContentValues lap = new ContentValues();
-                lap.put(DB.LAP_COLUMN_INDEX, i);
-                lap.put(DB.LAP_COLUMN_ITEMS, singleResult.getWorkItems());
-                lap.put(DB.LAP_COLUMN_WORKERS, singleResult.getWorkerCount());
                 lap.put(DB.LAP_COLUMN_TIME, time);
-                lap.put(DB.LAP_COLUMN_RACE_ID, raceId);
+                lap.put(DB.LAP_COLUMN_CAR_ID, carId);
                 db.insert(DB.LAP_TABLE_NAME, null, lap);
             }
         }
@@ -56,12 +62,46 @@ public class Persistence {
         db.close();
     }
 
-//    RACE_COLUMN_WORKER_ID, RACE_COLUMN_EXPONENT, LAP_COLUMN_WORKERS, LAP_COLUMN_ITEMS, LAP_COLUMN_TIME
+    public static final String getResultGroupsQueryCarCount = "carCount";
+
+    public static final String getResultGroupsQuery =
+            " SELECT " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT + ", count(" + DB.CAR_COLUMN_ID + ") as " + getResultGroupsQueryCarCount +
+            " FROM " + DB.RACE_TABLE_NAME +
+            " INNER JOIN " + DB.CAR_TABLE_NAME +
+            " ON " + DB.RACE_COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
+            " GROUP BY " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT +
+            " ORDER BY " + DB.RACE_COLUMN_WORKER_ID + " ASC, " + DB.RACE_COLUMN_EXPONENT + " ASC";
+
+    public static ResultSummary getResultSummary(Context context) {
+        ResultSummary.Builder result = ResultSummary.createBuilder();
+
+        SQLiteDatabase db = DB.readable(context);
+
+        try {
+            Cursor cursor = db.rawQuery(getResultGroupsQuery, null);
+
+            while (cursor.moveToNext()) {
+                int workerId = cursor.getInt(cursor.getColumnIndex(DB.RACE_COLUMN_WORKER_ID));
+                int exponent = cursor.getInt(cursor.getColumnIndex(DB.RACE_COLUMN_EXPONENT));
+                int lapCount = cursor.getInt(cursor.getColumnIndex(getResultGroupsQueryCarCount));
+                result.add(workerId, exponent, lapCount);
+            }
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+
+        return result.build();
+    }
 
     public static final String getResultQeury =
-            " SELECT * FROM " + DB.RACE_TABLE_NAME +
+            " SELECT " + DB.LAP_COLUMN_TIME + ", " + DB.CAR_COLUMN_WORKERS + ", " + DB.CAR_COLUMN_ITEMS +
+            " FROM " + DB.RACE_TABLE_NAME +
+            " INNER JOIN " + DB.CAR_TABLE_NAME +
+            " ON " + DB.RACE_COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
             " INNER JOIN " + DB.LAP_TABLE_NAME +
-            " ON " + DB.RACE_COLUMN_ID + " = " + DB.LAP_COLUMN_RACE_ID +
+            " ON " + DB.CAR_COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
             " WHERE " + DB.RACE_COLUMN_WORKER_ID + " = ?" +
             " AND " + DB.RACE_COLUMN_EXPONENT + " = ?";
 
@@ -79,8 +119,8 @@ public class Persistence {
 
             while (cursor.moveToNext()) {
                 long time = cursor.getLong(cursor.getColumnIndex(DB.LAP_COLUMN_TIME));
-                int workItems = cursor.getInt(cursor.getColumnIndex(DB.LAP_COLUMN_ITEMS));
-                int workerCount = cursor.getInt(cursor.getColumnIndex(DB.LAP_COLUMN_WORKERS));
+                int workItems = cursor.getInt(cursor.getColumnIndex(DB.CAR_COLUMN_ITEMS));
+                int workerCount = cursor.getInt(cursor.getColumnIndex(DB.CAR_COLUMN_WORKERS));
                 resultBuilder.addResult(time, workerCount, workItems);
             }
         } catch (SQLiteException e) {

@@ -2,8 +2,10 @@ package se.kth.oberg.matn.mtbench.model;
 
 import java.util.Observable;
 
+import se.kth.oberg.matn.mtbench.R;
+
 public class WorkerModelSelector extends Observable {
-    private final WorkerModel[] workers = new WorkerModel[] {
+    private static final WorkerModel[] workers = new WorkerModel[] {
         new WorkerModel1(),
         new WorkerModel2(),
         new WorkerModel3(),
@@ -45,5 +47,9 @@ public class WorkerModelSelector extends Observable {
         if (frozenWorkerId != workerId) {
             setWorkerId(workerId);
         }
+    }
+
+    public static WorkerModel getWorkerById(int id) {
+        return workers[id];
     }
 }

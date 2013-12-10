@@ -95,13 +95,13 @@ public class BenchmarkActivity extends ActionBarActivity implements ActionBar.On
                 }
                 case PAGE_INDEX_RESULT: {
                     ResultFragment fragment = new ResultFragment();
-                    fragment.setWorkerModelSelector(workerSelector);
                     return fragment;
                 }
                 default:
                     throw new IllegalStateException("Illegal fragment index requested");
             }
         }
+
         @Override
         public int getCount() {
             return 2;
