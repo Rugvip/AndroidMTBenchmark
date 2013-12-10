@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -62,13 +63,18 @@ public class Persistence {
         db.close();
     }
 
+    public static final String getResultGroupsQueryLapCount = "lapCount";
     public static final String getResultGroupsQueryCarCount = "carCount";
 
     public static final String getResultGroupsQuery =
-            " SELECT " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT + ", count(" + DB.CAR_COLUMN_ID + ") as " + getResultGroupsQueryCarCount +
+            " SELECT " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT + ", " +
+            " COUNT(" + DB.LAP_COLUMN_TIME + ") as " + getResultGroupsQueryLapCount + ", " +
+            " COUNT(" + DB.RACE_COLUMN_EXPONENT + ") as " + getResultGroupsQueryCarCount +
             " FROM " + DB.RACE_TABLE_NAME +
             " INNER JOIN " + DB.CAR_TABLE_NAME +
             " ON " + DB.RACE_COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
+            " INNER JOIN " + DB.LAP_TABLE_NAME +
+            " ON " + DB.LAP_COLUMN_CAR_ID + " = " + DB.CAR_COLUMN_ID +
             " GROUP BY " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT +
             " ORDER BY " + DB.RACE_COLUMN_WORKER_ID + " ASC, " + DB.RACE_COLUMN_EXPONENT + " ASC";
 
@@ -83,8 +89,10 @@ public class Persistence {
             while (cursor.moveToNext()) {
                 int workerId = cursor.getInt(cursor.getColumnIndex(DB.RACE_COLUMN_WORKER_ID));
                 int exponent = cursor.getInt(cursor.getColumnIndex(DB.RACE_COLUMN_EXPONENT));
-                int lapCount = cursor.getInt(cursor.getColumnIndex(getResultGroupsQueryCarCount));
-                result.add(workerId, exponent, lapCount);
+                int lapCount = cursor.getInt(cursor.getColumnIndex(getResultGroupsQueryLapCount));
+                int carCount = cursor.getInt(cursor.getColumnIndex(getResultGroupsQueryCarCount));
+                Log.e("COUNT", "lap: " + lapCount + " car: " + carCount);
+                result.add(workerId, exponent, lapCount / 16); // dafuq?
             }
         } catch (SQLiteException e) {
             e.printStackTrace();

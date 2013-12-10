@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -13,22 +13,25 @@
     android:id="@+id/fragment_result"
     tools:context="se.kth.oberg.matn.mtbench.ResultFragment">
 
-    <Button
-        android:id="@+id/button_drop_base"
-        android:background="@drawable/play_button"
-        android:layout_width="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="20dp"
-        android:layout_height="40sp"
-        android:text="DropTheBase"
-        android:textSize="20sp"
-        android:textColor="@android:color/white"
-        android:drawableRight="@android:drawable/ic_delete" />
-
     <ExpandableListView
         android:id="@+id/expandable_list_view_result_summary"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="10"
+        android:layout_gravity="right"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+
+    <Button
+        android:id="@+id/button_drop_base"
+        android:background="@drawable/play_button"
+        android:layout_width="match_parent"
+        android:paddingLeft="10dp"
+        android:paddingRight="5dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Drop The Base"
+        android:textSize="20sp"
+        android:textColor="@android:color/white"
+        android:drawableRight="@android:drawable/ic_delete"
+        android:drawableLeft="@android:drawable/ic_delete" />
 </LinearLayout>

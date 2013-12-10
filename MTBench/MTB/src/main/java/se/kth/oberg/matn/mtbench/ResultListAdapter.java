@@ -5,10 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 import se.kth.oberg.matn.mtbench.persistence.Persistence;
@@ -23,8 +22,9 @@ public class ResultListAdapter extends BaseExpandableListAdapter {
         this.inflater = inflater;
     }
 
-    public static void init(LayoutInflater inflater) {
+    public static void init(LayoutInflater inflater, Context context) {
         instance = new ResultListAdapter(inflater);
+        update(context);
     }
 
     public static ResultListAdapter getInstance() {
@@ -80,24 +80,37 @@ public class ResultListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
         if (view == null) {
-            view = inflater.inflate(android.R.layout.simple_list_item_1, null);
+            view = inflater.inflate(R.layout.expand_list_item_worker, null);
         }
-        TextView textView = (TextView) view;
+        TextView textView = (TextView) view.findViewById(android.R.id.text1);
         assert textView != null;
         textView.setText(WorkerModelSelector.getWorkerById(resultSummary.getWorkers().get(i).getWorkerId()).getName());
-        return textView;
+        return view;
     }
 
     @Override
-    public View getChildView(int i, int i2, boolean b, View view, ViewGroup viewGroup) {
+    public View getChildView(final int i, final int i2, boolean b, View view, ViewGroup viewGroup) {
         if (view == null) {
-            view = inflater.inflate(android.R.layout.simple_expandable_list_item_1, null);
+            view = inflater.inflate(R.layout.expand_list_item_workload, null);
         }
-        TextView textView = (TextView) view;
+
+        final ResultSummary.WorkloadSummary workloadSummary = resultSummary.getWorkers().get(i).getWorkloads().get(i2);
+
+        final TextView textView = (TextView) view.findViewById(android.R.id.text1);
         assert textView != null;
-        ResultSummary.WorkloadSummary workloadSummary = resultSummary.getWorkers().get(i).getWorkloads().get(i2);
         textView.setText("Exponent: " + workloadSummary.getExponent() + " runs: " + workloadSummary.getBenchmarkCount());
-        return textView;
+
+        final View button = view.findViewById(android.R.id.button1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onBenchmarkSelected(resultSummary.getWorkers().get(i).getWorkerId(), workloadSummary.getExponent());
+                }
+            }
+        });
+
+        return view;
     }
 
     @Override
@@ -109,19 +122,9 @@ public class ResultListAdapter extends BaseExpandableListAdapter {
         public void onBenchmarkSelected(int workerId, int exponent);
     }
 
-    private List<OnBenchmarkSelectedListener> listeners = new LinkedList<>();
+    private OnBenchmarkSelectedListener listener = null;
 
-    private void notifyListeners(int workerId, int exponent) {
-        for (OnBenchmarkSelectedListener listener : listeners) {
-            listener.onBenchmarkSelected(workerId, exponent);
-        }
-    }
-
-    public void addOnBenchmarkSelectedListener(OnBenchmarkSelectedListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeOnBenchmarkSelectedListener(OnBenchmarkSelectedListener listener) {
-        listeners.remove(listener);
+    public void setOnBenchmarkSelectedListener(OnBenchmarkSelectedListener listener) {
+        this.listener = listener;
     }
 }

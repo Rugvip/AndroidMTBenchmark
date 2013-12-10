@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import se.kth.oberg.matn.mtbench.model.BenchmarkResult;
 import se.kth.oberg.matn.mtbench.model.WorkerModelSelector;
 import se.kth.oberg.matn.mtbench.persistence.Persistence;
 
-public class ResultFragment extends Fragment {
+public class ResultFragment extends Fragment implements ResultListAdapter.OnBenchmarkSelectedListener {
     private static final String PREFERENCE_EXPONENT = "exponent";
     private static final String PREFERENCE_COUNT = "count";
     private static final int DEFAULT_EXPONENT = 16;
@@ -34,11 +35,11 @@ public class ResultFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_result, container, false);
         assert rootView != null;
 
-        ResultListAdapter.getInstance().init(getLayoutInflater(state));
+        ResultListAdapter.init(getLayoutInflater(state), getActivity());
+        ResultListAdapter.getInstance().setOnBenchmarkSelectedListener(this);
 
         ExpandableListView expandableListView = (ExpandableListView) rootView.findViewById(R.id.expandable_list_view_result_summary);
         expandableListView.setAdapter(ResultListAdapter.getInstance());
-        ResultListAdapter.getInstance().update(getActivity());
 
         rootView.findViewById(R.id.button_drop_base).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -53,7 +54,8 @@ public class ResultFragment extends Fragment {
 
     private void mail(int workerId, int exponent) {
         BenchmarkResult result = Persistence.getResult(getActivity(), workerId, exponent);
-
+        assert result != null;
+        Log.e("Email", "wid: " + workerId + " exp: " + exponent + " res: " + result);
         Intent send = new Intent(Intent.ACTION_SENDTO);
         String uriText = "mailto:" + Uri.encode("poldsberg@gmail.com") +
                 "?subject=" + Uri.encode("Multithreading Benchmark Result | " +
@@ -69,4 +71,9 @@ public class ResultFragment extends Fragment {
 
     // / 1000000000.0
     private static final DecimalFormat format = new DecimalFormat("#.###");
+
+    @Override
+    public void onBenchmarkSelected(int workerId, int exponent) {
+        mail(workerId, exponent);
+    }
 }

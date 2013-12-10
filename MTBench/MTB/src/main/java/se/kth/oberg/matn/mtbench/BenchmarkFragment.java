@@ -135,6 +135,7 @@ public class BenchmarkFragment extends Fragment implements Employer, Observer {
         runButton.setEnabled(true);
 
         Persistence.saveResult(getActivity(), workerModelSelector.getWorkerId(), resultBuilder.build());
+        ResultListAdapter.update(getActivity());
         resultBuilder = null;
         workerModelSelector.thaw();
     }
