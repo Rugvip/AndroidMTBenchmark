@@ -30,10 +30,10 @@ public class Persistence {
         db.execSQL(" DELETE " + DB.CAR_TABLE_NAME + ", " + DB.LAP_TABLE_NAME +
                 " FROM " + DB.LAP_TABLE_NAME +
                 " INNER JOIN " + DB.CAR_TABLE_NAME +
-                " ON " + DB.CAR_COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
+                " ON " + DB.CAR_TABLE_NAME + "." + DB.COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
                 " WHERE " + DB.CAR_COLUMN_RACE_ID + " = ?", args);
         db.delete(DB.CAR_TABLE_NAME, DB.CAR_COLUMN_RACE_ID + " = ?", args);
-        db.delete(DB.RACE_TABLE_NAME, DB.RACE_COLUMN_ID + " = ?", args);
+        db.delete(DB.RACE_TABLE_NAME, DB.RACE_TABLE_NAME + "." + DB.COLUMN_ID + " = ?", args);
         db.close();
     }
 
@@ -72,9 +72,9 @@ public class Persistence {
             " COUNT(" + DB.RACE_COLUMN_EXPONENT + ") as " + getResultGroupsQueryCarCount +
             " FROM " + DB.RACE_TABLE_NAME +
             " INNER JOIN " + DB.CAR_TABLE_NAME +
-            " ON " + DB.RACE_COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
+            " ON " + DB.RACE_TABLE_NAME + "." + DB.COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
             " INNER JOIN " + DB.LAP_TABLE_NAME +
-            " ON " + DB.LAP_COLUMN_CAR_ID + " = " + DB.CAR_COLUMN_ID +
+            " ON " + DB.LAP_COLUMN_CAR_ID + " = " + DB.CAR_TABLE_NAME + "." + DB.COLUMN_ID +
             " GROUP BY " + DB.RACE_COLUMN_WORKER_ID + ", " + DB.RACE_COLUMN_EXPONENT +
             " ORDER BY " + DB.RACE_COLUMN_WORKER_ID + " ASC, " + DB.RACE_COLUMN_EXPONENT + " ASC";
 
@@ -107,9 +107,9 @@ public class Persistence {
             " SELECT " + DB.LAP_COLUMN_TIME + ", " + DB.CAR_COLUMN_WORKERS + ", " + DB.CAR_COLUMN_ITEMS +
             " FROM " + DB.RACE_TABLE_NAME +
             " INNER JOIN " + DB.CAR_TABLE_NAME +
-            " ON " + DB.RACE_COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
+            " ON " + DB.RACE_TABLE_NAME + "." + DB.COLUMN_ID + " = " + DB.CAR_COLUMN_RACE_ID +
             " INNER JOIN " + DB.LAP_TABLE_NAME +
-            " ON " + DB.CAR_COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
+            " ON " + DB.CAR_TABLE_NAME + "." + DB.COLUMN_ID + " = " + DB.LAP_COLUMN_CAR_ID +
             " WHERE " + DB.RACE_COLUMN_WORKER_ID + " = ?" +
             " AND " + DB.RACE_COLUMN_EXPONENT + " = ?";
 

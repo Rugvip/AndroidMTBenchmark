@@ -9,13 +9,12 @@ class DB extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "results.db";
 
+    public static final String COLUMN_ID = "_id";
     public static final String RACE_TABLE_NAME = "race";
-    public static final String RACE_COLUMN_ID = "raceId";
     public static final String RACE_COLUMN_WORKER_ID = "raceWorkerId";
     public static final String RACE_COLUMN_EXPONENT = "raceExponent";
 
     public static final String CAR_TABLE_NAME = "car";
-    public static final String CAR_COLUMN_ID = "carId";
     public static final String CAR_COLUMN_RACE_ID = "carRaceId";
     public static final String CAR_COLUMN_WORKERS = "carWorkers";
     public static final String CAR_COLUMN_ITEMS = "carItems";
@@ -25,25 +24,25 @@ class DB extends SQLiteOpenHelper {
     public static final String LAP_COLUMN_TIME = "lapTime";
 
     public static final String CREATE_RACE_TABLE = "CREATE TABLE " + RACE_TABLE_NAME + "(" +
-            RACE_COLUMN_ID + " integer primary key autoincrement, " +
+            COLUMN_ID + " integer primary key autoincrement, " +
             RACE_COLUMN_WORKER_ID + " integer not null, " +
             RACE_COLUMN_EXPONENT + " integer not null " +
             ");";
 
     public static final String CREATE_CAR_TABLE = "CREATE TABLE " + CAR_TABLE_NAME + "(" +
-            CAR_COLUMN_ID + " integer primary key autoincrement, " +
+            COLUMN_ID + " integer primary key autoincrement, " +
             CAR_COLUMN_RACE_ID + " integer not null, " +
             CAR_COLUMN_WORKERS + " integer not null, " +
             CAR_COLUMN_ITEMS + " integer not null, " +
             "FOREIGN KEY(" + CAR_COLUMN_RACE_ID + ")" +
-            "REFERENCES " + RACE_TABLE_NAME + "(" + RACE_COLUMN_ID + ")" +
+            "REFERENCES " + RACE_TABLE_NAME + "(" + COLUMN_ID + ")" +
             ");";
 
     public static final String CREATE_LAP_TABLE = "CREATE TABLE " + LAP_TABLE_NAME + "(" +
             LAP_COLUMN_CAR_ID + " integer not null, " +
             LAP_COLUMN_TIME + " integer not null, " +
             "FOREIGN KEY(" + LAP_COLUMN_CAR_ID + ")" +
-            "REFERENCES " + CAR_TABLE_NAME + "(" + CAR_COLUMN_ID + ")" +
+            "REFERENCES " + CAR_TABLE_NAME + "(" + COLUMN_ID + ")" +
             ");";
 
     private DB(Context context) {
